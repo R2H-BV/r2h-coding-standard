@@ -1,0 +1,11 @@
+{
+  "preset": "laravel",
+  "rules": {
+    "declare_equal_normalize": {
+      "space": "single"
+    },
+    "blank_line_after_opening_tag": false,
+    "blank_line_between_import_groups": false,
+    "class_attributes_separation": false
+  }
+}
