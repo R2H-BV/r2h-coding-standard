@@ -48,3 +48,35 @@ class Post extends Model
     }
 }
 ```
+
+## Checking Changes with PHPCS
+
+- Every PHP file you created or changed must be checked with `phpcs` before the change is considered done. Fix every reported error and warning.
+- Only check the files and directories you touched; do not run `phpcs` on the whole project unless asked.
+- Use `phpcbf` to fix violations that can be fixed automatically, then run `phpcs` again to confirm nothing is left.
+- The application's `phpcs.xml` (or `phpcs.xml.dist`) configures the R2H standard. If the application has no such file, add `--standard=R2H` to the commands below.
+
+Check a specific file:
+
+```bash
+./vendor/bin/phpcs app/Models/Post.php
+```
+
+Check multiple files at once:
+
+```bash
+./vendor/bin/phpcs app/Models/Post.php app/Http/Controllers/PostController.php
+```
+
+Check a specific directory:
+
+```bash
+./vendor/bin/phpcs app/Models
+```
+
+Automatically fix violations in a file or directory:
+
+```bash
+./vendor/bin/phpcbf app/Models/Post.php
+./vendor/bin/phpcbf app/Models
+```
