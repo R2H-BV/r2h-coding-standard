@@ -49,12 +49,49 @@ class Post extends Model
 }
 ```
 
-## Checking Changes with PHPCS
+## Checking PHP Code with Pint, PHPCS and PHPStan
 
-- Every PHP file you created or changed must be checked with `phpcs` before the change is considered done. Fix every reported error and warning.
-- Only check the files and directories you touched; do not run `phpcs` on the whole project unless asked.
-- Use `phpcbf` to fix violations that can be fixed automatically, then run `phpcs` again to confirm nothing is left.
-- The application's `phpcs.xml` (or `phpcs.xml.dist`) configures the R2H standard. If the application has no such file, add `--standard=R2H` to the commands below.
+- Every PHP file you created or changed must be checked with **Laravel Pint**, **PHPCS** and **PHPStan** before the change is considered done. Fix every reported error and warning; a change is only done when all three tools pass.
+- Only check the files and directories you touched; do not run the tools on the whole project unless asked.
+- Run the tools in this order, because each step can change the code the next one checks:
+  1. `pint` to format the code.
+  2. `phpcbf` to fix PHPCS violations that can be fixed automatically, then `phpcs` to confirm nothing is left.
+  3. `phpstan` to analyse the code.
+- After fixing PHPStan errors by hand, run `pint` and `phpcs` again on the changed files.
+- Fix the code itself. Do not silence errors by adding `@phpstan-ignore` or `phpcs:ignore` comments, adding entries to the PHPStan baseline, lowering the PHPStan level or changing the PHPCS or Pint configuration, unless explicitly asked.
+
+### Laravel Pint
+
+The application's `pint.json` configures the R2H preset. If the application has no `pint.json`, add `--config vendor/r2h/r2h-coding-standard/pint.json` to the commands below.
+
+Format a specific file:
+
+```bash
+./vendor/bin/pint app/Models/Post.php
+```
+
+Format multiple files or a directory:
+
+```bash
+./vendor/bin/pint app/Models/Post.php app/Http/Controllers/PostController.php
+./vendor/bin/pint app/Models
+```
+
+Format all files with uncommitted changes:
+
+```bash
+./vendor/bin/pint --dirty
+```
+
+Only check the formatting without changing files:
+
+```bash
+./vendor/bin/pint --test app/Models/Post.php
+```
+
+### PHPCS
+
+The application's `phpcs.xml` (or `phpcs.xml.dist`) configures the R2H standard. If the application has no such file, add `--standard=R2H` to the commands below.
 
 Check a specific file:
 
@@ -80,3 +117,39 @@ Automatically fix violations in a file or directory:
 ./vendor/bin/phpcbf app/Models/Post.php
 ./vendor/bin/phpcbf app/Models
 ```
+
+### PHPStan
+
+The application's `phpstan.neon` (or `phpstan.neon.dist`) configures PHPStan (usually with Larastan) and its level. Always use that configuration; do not pass a different `--level`.
+
+Analyse a specific file:
+
+```bash
+./vendor/bin/phpstan analyse app/Models/Post.php
+```
+
+Analyse multiple files or a directory:
+
+```bash
+./vendor/bin/phpstan analyse app/Models/Post.php app/Http/Controllers/PostController.php
+./vendor/bin/phpstan analyse app/Models
+```
+
+If PHPStan runs out of memory, raise the memory limit:
+
+```bash
+./vendor/bin/phpstan analyse --memory-limit=1G app/Models
+```
+
+### Example Workflow
+
+After creating `app/Models/Post.php` and changing `app/Http/Controllers/PostController.php`:
+
+```bash
+./vendor/bin/pint app/Models/Post.php app/Http/Controllers/PostController.php
+./vendor/bin/phpcbf app/Models/Post.php app/Http/Controllers/PostController.php
+./vendor/bin/phpcs app/Models/Post.php app/Http/Controllers/PostController.php
+./vendor/bin/phpstan analyse app/Models/Post.php app/Http/Controllers/PostController.php
+```
+
+Fix any remaining errors, then run the commands again until all three tools report no errors.
